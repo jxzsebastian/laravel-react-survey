@@ -3,6 +3,7 @@ import { Disclosure, Menu, Transition } from '@headlessui/react'
 import { Bars3Icon, BellIcon, UserIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { NavLink, Navigate, Outlet } from 'react-router-dom'
 import { useStateContext } from '../contexts/ContextProvider'
+import axiosClient from '../axios.js'
 
 
 const navigation = [
@@ -17,7 +18,7 @@ function classNames(...classes) {
 export default function DefaultLayout() {
     
 
-    const {currentUser, userToken} = useStateContext();
+    const {currentUser, userToken, setCurrentUser, setUserToken} = useStateContext();
 
     if (!userToken) {
         return <Navigate to='login' />
@@ -25,7 +26,12 @@ export default function DefaultLayout() {
     }
     const logout = (ev) => {
         ev.preventDefault();
-        console.log("Logout");
+
+        axiosClient.post('/logout')
+        .then(res => {
+          setCurrentUser({})
+          setUserToken(null)
+        })
     }
 
     

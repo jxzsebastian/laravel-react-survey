@@ -2,8 +2,13 @@ import React, { useState } from 'react'
 import PageComponent from '../components/PageComponent'
 import { PhotoIcon } from '@heroicons/react/24/outline';
 import TButton from '../components/core/TButton';
+import axiosClient from "../axios.js";
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import SurveyQuestions from '../components/SurveyQuestions';
 
 export default function SurveyView() {
+    const navigate = useNavigate();
     const [survey, setSurvey] = useState({
         title: "",
         slug: "",
@@ -12,22 +17,55 @@ export default function SurveyView() {
         image: null,
         image_url: null,
         expire_date: "",
-        questions: [],
+        questions: []
 });
+const [error, setError] = useState("");
 
-const onImageChoose = () => {
-    console.log("On image choose")
+const onImageChoose = (ev) => {
+const file = ev.target.files[0];
+
+const reader = new FileReader();
+
+reader.onload = () => {
+    setSurvey({
+        ...survey,
+        image: file,
+        image_url: reader.result
+    })
+    ev.target.value="";
+}
+reader.readAsDataURL(file);
+
 }
 
 const onSubmit = (ev) => {
     ev.preventDefault();
-    console.log(ev);
 
-}
+    const payload = {...survey};
+    if (payload.image) {
+        payload.image = payload.image_url
+    }
+    delete payload.image_url;
+    axiosClient.post('/survey', payload).then((res) => {
+        console.log(res);
+        navigate('/surveys')
+    })
+    .catch((err) => {
+
+        if (err && err.response) {
+            setError(err.response.data.message)
+        }
+    });
+
+};
 
 
     return (  
     <PageComponent title="Create new survey">
+    
+    {error &&( <div className="bg-red-500 text-white py-3 px-3">
+        {error}
+    </div>)}
         <form action="#" method='POST' onSubmit={onSubmit}>
             <div className='shadow sm:overflow-hidden sm:rounded-md'>
                 <div className='space-y-6 bg-white px-4 py-5 sm:p-6'>
@@ -127,7 +165,6 @@ const onSubmit = (ev) => {
                             type="checkbox"
                             id='status'
                             name='status'
-                            checked={survey.status}
                             className='h-4 w-4 rounded border-gray-300 text-indigo-600 focus-ring-indigo-500' />
                         </div>
 
@@ -143,6 +180,8 @@ const onSubmit = (ev) => {
                     </div>
 
                     {/* Active */}
+
+                    <SurveyQuestions />
 
                 </div>
 
