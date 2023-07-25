@@ -60,6 +60,10 @@ const onSubmit = (ev) => {
 };
 
 
+function onSurveyUpdate(survey) {
+    setSurvey({...survey})
+}
+
     return (  
     <PageComponent title="Create new survey">
     
@@ -181,7 +185,7 @@ const onSubmit = (ev) => {
 
                     {/* Active */}
 
-                    <SurveyQuestions />
+                    <SurveyQuestions survey={survey} onSurveyUpdate={onSurveyUpdate} />
 
                 </div>
 

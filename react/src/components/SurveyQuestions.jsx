@@ -1,8 +1,11 @@
 import { PlusIcon } from "@heroicons/react/24/outline";
+import { useEffect, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
+import QuestionEditor from "./QuestionEditor";
 
 export default function SurveyQuestions({survey, onSurveyUpdate}) {
 
-    const [model. setModel] = useState({...survey});    
+    const [model, setModel] = useState({...survey});    
 
     const addQuestion = () => {
         setModel({
@@ -19,6 +22,35 @@ export default function SurveyQuestions({survey, onSurveyUpdate}) {
             ],
         });
     };
+
+
+    const questionChange = (question) => {
+        if (!question) return;
+        const newQuestions = model.questions.map((q) => {
+            if (q.id == question.id) {
+                return {...question};
+            }
+            return q;
+        })
+
+        setModel({
+            ...model,
+            questions: newQuestions,
+        });
+    };
+
+    const deleteQuestion = (question) => {
+        const newQuestions = model.questions.filter((q) => q.id !== question.id);
+        setModel({
+            ...model,
+            questions: newQuestions,
+        });
+    };
+
+    useEffect(() => {
+        onSurveyUpdate(model);
+    }, [model])
+
 return (
     <>
     <div className="flex justify-between">
