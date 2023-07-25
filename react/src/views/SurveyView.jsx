@@ -6,6 +6,7 @@ import axiosClient from "../axios.js";
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import SurveyQuestions from '../components/SurveyQuestions';
+import { v4 as uuidv4 } from "uuid";
 
 export default function SurveyView() {
     const navigate = useNavigate();
@@ -51,7 +52,6 @@ const onSubmit = (ev) => {
         navigate('/surveys')
     })
     .catch((err) => {
-
         if (err && err.response) {
             setError(err.response.data.message)
         }
@@ -60,13 +60,29 @@ const onSubmit = (ev) => {
 };
 
 
-function onSurveyUpdate(survey) {
-    setSurvey({...survey})
+function onQuestionsUpdate(questions) {
+    setSurvey({
+        ...survey,
+        questions
+    })
 }
+
+const addQuestion = () => {
+    survey.questions.push({
+        id: uuidv4(),
+        type: "text",
+        question: "",
+        description: "",
+        data: {},
+    })
+    setSurvey({...survey})
+
+/*     setMyQuestions([...myQuestions]);
+    onQuestionsUpdate(myQuestions); */
+};
 
     return (  
     <PageComponent title="Create new survey">
-    
     {error &&( <div className="bg-red-500 text-white py-3 px-3">
         {error}
     </div>)}
@@ -169,6 +185,10 @@ function onSurveyUpdate(survey) {
                             type="checkbox"
                             id='status'
                             name='status'
+                            checked={survey.status}
+                            onChange={(ev) =>
+                            setSurvey({ ...survey, status: ev.target.checked })
+                            }
                             className='h-4 w-4 rounded border-gray-300 text-indigo-600 focus-ring-indigo-500' />
                         </div>
 
@@ -185,7 +205,8 @@ function onSurveyUpdate(survey) {
 
                     {/* Active */}
 
-                    <SurveyQuestions survey={survey} onSurveyUpdate={onSurveyUpdate} />
+                    <button type='button' onClick={addQuestion}>Add question</button>
+                    <SurveyQuestions questions={survey.questions} onQuestionsUpdate={onQuestionsUpdate} />
 
                 </div>
 

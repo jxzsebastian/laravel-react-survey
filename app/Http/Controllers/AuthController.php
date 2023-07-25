@@ -64,4 +64,7 @@ class AuthController extends Controller
     {
         return $request->user();
     }
+
+
+    
 }

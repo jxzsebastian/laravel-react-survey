@@ -3,15 +3,41 @@ import PageComponent from "../components/PageComponent";
 import SurveyListItem from "../components/SurveyListItem";
 import TButton from "../components/core/TButton";
 import { useStateContext } from "../contexts/ContextProvider";
+import { useEffect, useState } from "react";
+import axiosClient from "../axios";
+import PaginationLinks from "../components/PaginationLinks";
 
 export default function Surverys() {
-    const {surveys} = useStateContext();
+  const [surveys, setSurveys] = useState([]);
+  const [meta, setMeta] = useState({});
+  const [loading, setLoading] = useState(false)
     console.log(surveys); 
 
     const onDeleteClick = () => {
       console.log("onDeleteClick");
     }
 
+    const onPageClick = (link) => {
+      getSurveys(link.url)
+    }
+
+    const getSurveys = (url) => {
+
+      url = url || '/survey'
+      setLoading(true)
+      
+      axiosClient.get(url)
+      .then(({data}) => {
+        setSurveys(data.data)
+        setMeta(data.meta)
+        setLoading(false)
+      })
+    }
+
+    useEffect(() => {
+      getSurveys();
+
+    }, [])
 
   return (
     <PageComponent title="Surveys" buttons={ (
@@ -20,11 +46,25 @@ export default function Surverys() {
         Create new
       </TButton>
     ) }>
+
+      {loading && <div
+  className=" h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+  role="status">
+  <span
+    className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]"
+    >Loading...</span>
+</div> }
+
+  {!loading && <div>
     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3">
             {surveys.map((survey) => (
                 <SurveyListItem survey={survey} key={survey.id} onDeleteClick={onDeleteClick}/>
             ))}
     </div>        
+      
+    <PaginationLinks meta={meta} onPageClick={onPageClick} />
+  </div>
+}
     </PageComponent>
 
     
