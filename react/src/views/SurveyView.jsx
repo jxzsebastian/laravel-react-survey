@@ -1,15 +1,20 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import PageComponent from '../components/PageComponent'
-import { PhotoIcon } from '@heroicons/react/24/outline';
+import { LinkIcon, PhotoIcon, PlusCircleIcon, TrashIcon } from '@heroicons/react/24/outline';
 import TButton from '../components/core/TButton';
 import axiosClient from "../axios.js";
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import SurveyQuestions from '../components/SurveyQuestions';
 import { v4 as uuidv4 } from "uuid";
+import { useStateContext } from '../contexts/ContextProvider';
 
 export default function SurveyView() {
     const navigate = useNavigate();
+    const {id} = useParams();
+    const { showToast } = useStateContext();
+
+
     const [survey, setSurvey] = useState({
         title: "",
         slug: "",
@@ -20,6 +25,8 @@ export default function SurveyView() {
         expire_date: "",
         questions: []
 });
+const [loading, setLoading] = useState(false);
+
 const [error, setError] = useState("");
 
 const onImageChoose = (ev) => {
@@ -47,9 +54,22 @@ const onSubmit = (ev) => {
         payload.image = payload.image_url
     }
     delete payload.image_url;
-    axiosClient.post('/survey', payload).then((res) => {
+    let res = null;
+    if (id) {
+       res = axiosClient.put(`/survey/${id}`, payload)
+    }else{
+        res = axiosClient.post('/survey', payload)
+    }
+
+    res
+    .then((res) => {
         console.log(res);
         navigate('/surveys')
+        if (id) {
+        showToast('The survey was updated')
+        }else{
+            showToast('The survey was created')
+        }
     })
     .catch((err) => {
         if (err && err.response) {
@@ -81,12 +101,48 @@ const addQuestion = () => {
     onQuestionsUpdate(myQuestions); */
 };
 
+const onDelete = () => {
+    
+}
+
+useEffect(() => {
+    if (id) {
+        setLoading(true)
+        axiosClient.get(`/survey/${id}`)
+        .then(({data}) => {
+            setSurvey(data.data)
+            setLoading(false)
+        })
+    }
+}, [])
+
+
     return (  
-    <PageComponent title="Create new survey">
+    <PageComponent buttons={
+        <div className='flex gap-2'>
+      <TButton color="green" href={`/survey/public/${survey.slug}`}>
+        <LinkIcon className='w-4 h-4 mr-2' />
+        Public Link
+      </TButton> 
+      
+      <TButton color="red" onClick={onDelete}>
+        <TrashIcon className='w-4 h-4 mr-2' />
+        Delete
+      </TButton>          
+        </div>
+    }  title={!id ? 'Create new survey' : 'Update Survey'}>
     {error &&( <div className="bg-red-500 text-white py-3 px-3">
-        {error}
-    </div>)}
-        <form action="#" method='POST' onSubmit={onSubmit}>
+        {error}</div>)}
+
+        {loading && <div
+        className=" h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+        role="status">
+        <span
+            className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]"
+            >Loading...</span>
+        </div> }
+
+        {!loading && <form action="#" method='POST' onSubmit={onSubmit}>
             <div className='shadow sm:overflow-hidden sm:rounded-md'>
                 <div className='space-y-6 bg-white px-4 py-5 sm:p-6'>
                     {/* image */}
@@ -217,6 +273,7 @@ const addQuestion = () => {
                 </div>
             </div>
         </form>
+        }
     </PageComponent>
   )
 }

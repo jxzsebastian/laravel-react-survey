@@ -20,6 +20,7 @@ Route::middleware('auth:sanctum')->group(function() {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::apiResource('survey', SurveyController::class);
     Route::get('/me', [AuthController::class, 'me']);
+    Route::get('/survey/get-by-slug/{survey:slug}', [SurveyController::class, 'getBySlug']);
 
 
 });

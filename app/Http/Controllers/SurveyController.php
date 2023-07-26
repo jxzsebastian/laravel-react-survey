@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\QuestionTypeEnum;
 use App\Http\Requests\StoreSurveyAnswerRequest;
-use App\Http\Resources\SurveyResource;
+use App\Http\Resources\X;
 use App\Models\Survey;
 use App\Http\Requests\StoreSurveyRequest;
 use App\Http\Requests\UpdateSurveyRequest;
@@ -18,7 +18,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 use Symfony\Component\HttpFoundation\Request;
-
+use App\Http\Resources\SurveyResource;
 
 class SurveyController extends Controller
 {
@@ -62,8 +62,8 @@ class SurveyController extends Controller
     public function show(Survey $survey, Request $request)
     {
         //
-        $user = $request->user;
-
+        $user = $request->user();
+        
         if ($user->id !== $survey->user_id) {
             return abort(403, 'Unhautorized action');
         }
@@ -131,7 +131,7 @@ class SurveyController extends Controller
     public function destroy(Survey $survey, Request $request)
     {
         //
-        $user = $request->user;
+        $user = $request->user();
 
         if ($user->id !== $survey->user_id) {
             return abort(403, 'Unhautorized action');
@@ -249,5 +249,21 @@ class SurveyController extends Controller
         ]);
 
         return $question->update($validator->validated());
+     }
+
+     public function getBySlug(Survey $survey){
+        if (!$survey->status ) {
+            return response("", 404);
+        }
+
+        $currentDate = new \DateTime();
+        $expireDate = new \DateTime($survey->expire_date);
+
+        if ($currentDate > $expireDate) {
+            return response("", 404);
+        }
+
+        return new SurveyResource($survey);
+        
      }
 }

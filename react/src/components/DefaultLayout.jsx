@@ -5,6 +5,7 @@ import { NavLink, Navigate, Outlet } from 'react-router-dom'
 import { useStateContext } from '../contexts/ContextProvider'
 import axiosClient from '../axios.js'
 import axios from 'axios'
+import Toast from './Toast'
 
 
 const navigation = [
@@ -44,14 +45,6 @@ export default function DefaultLayout() {
     
   return (
     <>
-      {/*
-        This example requires updating your template:
-
-        ```
-        <html class="h-full bg-gray-100">
-        <body class="h-full">
-        ```
-      */}
       <div className="min-h-full">
         <Disclosure as="nav" className="bg-gray-800">
           {({ open }) => (
@@ -177,8 +170,10 @@ export default function DefaultLayout() {
             </>
           )}
         </Disclosure>
+        
         <Outlet />
 
+        <Toast />
 
       </div>
     </>
