@@ -2,10 +2,9 @@
 
 namespace App\Models;
 
-
-use Spatie\Sluggable\HasSlug;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
 
 class Survey extends Model
@@ -13,9 +12,11 @@ class Survey extends Model
     use HasFactory;
     use HasSlug;
 
-    protected $fillable = ['title', 'user_id' , 'description', 'image' , 'expire_date', 'status', 'created_at', 'updated_at'];
+    protected $fillable = ['title', 'description', 'expire_date', 'image', 'user_id', 'status', 'created_at', 'updated_at'];
 
-
+    /**
+     * Get the options for generating the slug.
+     */
     public function getSlugOptions() : SlugOptions
     {
         return SlugOptions::create()
@@ -23,8 +24,13 @@ class Survey extends Model
             ->saveSlugsTo('slug');
     }
 
-    public function questions(){
-        return $this->hasMany(SurveyQuestion::class);   
+    public function questions()
+    {
+        return $this->hasMany(SurveyQuestion::class);
     }
 
+    public function answers()
+    {
+        return $this->hasMany(SurveyAnswer::class);
+    }
 }

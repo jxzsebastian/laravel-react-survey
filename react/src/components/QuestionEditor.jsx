@@ -123,7 +123,6 @@ export default function QuestionEditor({
             {/* Questio n Description*/}
 
 
-            {JSON.stringify(model)}
 
             <div>{shouldHaveOptions() && (<div>
                 
